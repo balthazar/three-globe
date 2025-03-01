@@ -25,6 +25,9 @@ export default Kapsule({
     htmlLng: { default: 'lng' },
     htmlAltitude: { default: 0 }, // in units of globe radius
     htmlElement: {},
+    htmlElementBehindModifier: {
+      default: (obj, isBehind) => (obj.visible = !isBehind),
+    },
     htmlTransitionDuration: { default: 1000, triggerUpdate: false }, // ms
     isBehindGlobe: { onChange() { this.updateObjVisibility() }, triggerUpdate: false }
   },
@@ -35,8 +38,13 @@ export default Kapsule({
       // default to all if no obj specified
       const objs = obj ? [obj] : state.dataMapper.entries().map(([, o]) => o).filter(d => d);
       // Hide elements on the far side of the globe
-      objs.forEach(obj => (obj.visible = !state.isBehindGlobe || !state.isBehindGlobe(obj.position)));
-    }
+      objs.forEach((obj) => {
+        state.htmlElementBehindModifier(
+          obj,
+          !state.isBehindGlobe || !state.isBehindGlobe(obj.position),
+        );
+      });
+    },
   },
 
   init(threeObj, state, { tweenGroup }) {
